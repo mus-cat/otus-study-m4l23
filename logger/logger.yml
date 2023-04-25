@@ -1,0 +1,16 @@
+---
+    - name: Install needed packages
+      ansible.builtin.apt:
+        state: present
+        name: 
+        - rsyslog
+
+    - name: Copy rsyslog config file 
+      ansible.builtin.copy:
+        src: 10-fromRemoteHosts.conf
+        dest: /etc/rsyslog.d/
+
+    - name: Restart rsyslog
+      ansible.builtin.systemd:
+        name: rsyslog
+        state: restarted

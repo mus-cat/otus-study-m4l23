@@ -1,0 +1,32 @@
+---
+    - name: Install needed packages
+      ansible.builtin.apt:
+        state: present
+        name: 
+        - nginx
+        - auditd
+
+    - name: Place config string for auditd
+      ansible.builtin.lineinfile:
+        path: /etc/audit/rules.d/audit.rules
+        line: '{{ item }}'
+      loop:
+        - '-w /etc/nginx/nginx.conf -p wa -k nginx_conf'
+        - '-w /etc/nginx/conf.d/ -p wa -k nginx_conf'
+        - '-w /etc/nginx/sites-enabled/ -p wa -k nginx_conf'
+        - '-w /etc/nginx/sites-available/default -p wa -k nginx_conf'
+
+    - name: Restart auditd
+      ansible.builtin.systemd:
+        name: auditd
+        state: restarted
+
+    - name: Copy rsyslog file
+      ansible.builtin.template:
+        dest: /etc/rsyslog.d/10-copyDataToRemoteHost.conf
+        src: 10-copyDataToRemoteHost.conf.j2
+
+    - name: Restart rsyslog
+      ansible.builtin.systemd:
+        name: rsyslog
+        state: restarted

@@ -1,0 +1,15 @@
+---
+- name: Systemd
+  hosts: all
+  become: yes
+  gather_facts: yes
+  vars:
+
+  tasks:
+    - name: Include task for Logger
+      ansible.builtin.include_tasks: logger/logger.yml
+      when: ansible_facts.hostname == 'logger'
+
+    - name: Include task for Web
+      ansible.builtin.include_tasks: web/web.yml
+      when: ansible_facts.hostname == 'web'

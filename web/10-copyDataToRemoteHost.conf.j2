@@ -1,0 +1,15 @@
+{%- set ns = namespace(ip_log='0.0.0.0') -%}
+{%- for ip in  hostvars['logger'].ansible_all_ipv4_addresses -%}
+{%- if not (ip == '10.0.2.15') -%}
+{%- set ns.log_ip = ip -%}
+{%- endif -%}
+{%- endfor -%}
+module(load="imfile")
+ruleset(name="toRemotehost"){
+	action(type="omfwd" port="514" protocol="udp" target="{{ ns.log_ip }}")
+}
+input(type="imfile" file="/var/log/audit/audit.log" tag="audit" ruleset="toRemoteHost")
+input(type="imfile" file="/var/log/nginx/error.log" tag="nginx_error" ruleset="toRemoteHost")
+input(type="imfile" file="/var/log/nginx/access.log" tag="nginx_access" ruleset="toRemoteHost")
+
+*.crit	@{{ns.log_ip}}
